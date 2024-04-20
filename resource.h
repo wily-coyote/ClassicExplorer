@@ -9,11 +9,15 @@
 #define IDS_GOBUTTONLABEL               102
 #define IDS_ADDRESSBANDACCELERATOR      103
 #define IDB_GO_ACTIVE                   205
-#define IDB_BITMAP2                     206
 #define IDB_GO_INACTIVE                 206
+#define IDB_MEMPHIS_GO_ACTIVE           207
+#define IDB_MEMPHIS_GO_INACTIVE         208
 #define IDB_THROBBER_SIZE_SMALL         210
 #define IDB_THROBBER_SIZE_MID           211
 #define IDB_THROBBER_SIZE_LARGE         212
+#define IDB_MEMPHIS_THROBBER_SIZE_SMALL 213
+#define IDB_MEMPHIS_THROBBER_SIZE_MID   214
+#define IDB_MEMPHIS_THROBBER_SIZE_LARGE 215
 
 // Next default values for new objects
 // 

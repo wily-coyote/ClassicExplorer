@@ -20,6 +20,7 @@ class AddressBar : public CWindowImpl<AddressBar>
 		HWND m_comboBoxEditCtl = NULL;
 
 		bool m_showGoButton = false;
+		bool m_memphisStyle = false;
 
 		HIMAGELIST m_himlGoInactive = NULL;
 		HIMAGELIST m_himlGoActive = NULL;
@@ -66,6 +67,7 @@ class AddressBar : public CWindowImpl<AddressBar>
 		LRESULT OnNotify(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL &bHandled);
 
 	protected: // Miscellaneous functions:
+		LRESULT GetBooleanRegKey(PTCHAR key, bool* boolValue);
 
 		static LRESULT CALLBACK ComboboxSubclassProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData);
 		static LRESULT CALLBACK RealComboboxSubclassProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData);

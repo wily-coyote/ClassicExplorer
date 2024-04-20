@@ -13,6 +13,23 @@
 
 #include "ThrobberBand.h"
 
+LRESULT ThrobberBand::GetBooleanRegKey(PTCHAR key, bool* boolValue) {
+	HKEY regkey;
+	LSTATUS regstatus = RegCreateKeyEx(HKEY_CURRENT_USER, TEXT("SOFTWARE\\ClassicExplorer"), 0, NULL, REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS, NULL, &regkey, NULL);
+	if (regstatus == ERROR_SUCCESS) {
+		DWORD showGoButton_t;
+		BYTE bufShowGoButton[8192];
+		DWORD cbShowGoButton = sizeof(bufShowGoButton);
+		regstatus = RegQueryValueEx(regkey, key, NULL, &showGoButton_t, (LPBYTE)bufShowGoButton, &cbShowGoButton);
+		if (regstatus == ERROR_SUCCESS) {
+			DWORD* showGoButton = reinterpret_cast<DWORD*>(bufShowGoButton);
+			*boolValue = (*showGoButton != 0);
+			return S_OK;
+		}
+	}
+	return E_FAIL;
+}
+
 void ThrobberBand::ClearResources()
 {
 	DeleteObject(m_hBitmap);
@@ -35,10 +52,12 @@ LRESULT ThrobberBand::OnPaint(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL &bHa
 	destinationPoint.x = (clientRect.right - clientRect.left - m_cxCurBmp) / 2;
 	destinationPoint.y = (clientRect.bottom - clientRect.top - m_cyCurBmp) / 2;
 
-	::SetBkColor(dc, RGB(255, 255, 255));
+	COLORREF paintWith = m_memphisStyle == true ? RGB(0,0,0) : RGB(255, 255, 255);
+
+	::SetBkColor(dc, paintWith);
 
 	// Draw the background
-	HBRUSH bgBrush = CreateSolidBrush(RGB(255, 255, 255));
+	HBRUSH bgBrush = CreateSolidBrush(paintWith);
 	FillRect(dc, &clientRect, bgBrush);
 	DeleteObject(bgBrush);
 
@@ -94,19 +113,19 @@ LRESULT ThrobberBand::LoadBitmapForSize()
 	DeleteObject(m_hBitmap);
 
 	int cySelf = curRect.bottom - curRect.top;
-	int resourceId = IDB_THROBBER_SIZE_SMALL;
+	int resourceId = m_memphisStyle == true ? IDB_MEMPHIS_THROBBER_SIZE_SMALL : IDB_THROBBER_SIZE_SMALL;
 
 	if (cySelf >= 38)
 	{
-		resourceId = IDB_THROBBER_SIZE_LARGE;
+		resourceId = m_memphisStyle == true ? IDB_MEMPHIS_THROBBER_SIZE_LARGE : IDB_THROBBER_SIZE_LARGE;
 	}
 	else if (cySelf >= 26)
 	{
-		resourceId = IDB_THROBBER_SIZE_MID;
+		resourceId = m_memphisStyle == true ? IDB_MEMPHIS_THROBBER_SIZE_MID : IDB_THROBBER_SIZE_MID;
 	}
 	else
 	{
-		resourceId = IDB_THROBBER_SIZE_SMALL;
+		resourceId = m_memphisStyle == true ? IDB_MEMPHIS_THROBBER_SIZE_SMALL : IDB_THROBBER_SIZE_SMALL;
 	}
 
 	m_hBitmap = LoadBitmapW(
@@ -467,6 +486,9 @@ STDMETHODIMP ThrobberBand::SetSite(IUnknown *pUnkSite)
 			}
 		}
 	}
+
+	m_memphisStyle = FALSE;
+	GetBooleanRegKey(L"MemphisStyle", &m_memphisStyle);
 
 	LoadBitmapForSize();
 

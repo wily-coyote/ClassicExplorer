@@ -9,8 +9,26 @@
 #include "dllmain.h"
 #include <commoncontrols.h>
 #include "shell_helpers.h"
+#include "winreg.h"
 
 #include "AddressBar.h"
+
+LRESULT AddressBar::GetBooleanRegKey(PTCHAR key, bool* boolValue) {
+	HKEY regkey;
+	LSTATUS regstatus = RegCreateKeyEx(HKEY_CURRENT_USER, TEXT("SOFTWARE\\ClassicExplorer"), 0, NULL, REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS, NULL, &regkey, NULL);
+	if (regstatus == ERROR_SUCCESS) {
+		DWORD showGoButton_t;
+		BYTE bufShowGoButton[8192];
+		DWORD cbShowGoButton = sizeof(bufShowGoButton);
+		regstatus = RegQueryValueEx(regkey, key, NULL, &showGoButton_t, (LPBYTE)bufShowGoButton, &cbShowGoButton);
+		if (regstatus == ERROR_SUCCESS) {
+			DWORD* showGoButton = reinterpret_cast<DWORD*>(bufShowGoButton);
+			*boolValue = (*showGoButton != 0);
+			return S_OK;
+		}
+	}
+	return E_FAIL;
+}
 
 /*
  * OnCreate: Handle the WM_CREATE message sent out and create the address bar controls.
@@ -18,8 +36,12 @@
 LRESULT AddressBar::OnCreate(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL &bHandled)
 {
 	HINSTANCE moduleInstance = _AtlBaseModule.GetModuleInstance();
-
+	
 	m_showGoButton = TRUE;
+	m_memphisStyle = FALSE;
+
+	GetBooleanRegKey(L"ShowGoButton", &m_showGoButton);
+	GetBooleanRegKey(L"MemphisStyle", &m_memphisStyle);
 
 	m_toolbar = CreateWindowEx(
 		WS_EX_TOOLWINDOW,
@@ -93,8 +115,8 @@ LRESULT AddressBar::CreateGoButton()
 
 	m_himlGoInactive = ImageList_LoadImageW(
 		resourceInstance,
-		MAKEINTRESOURCEW(IDB_GO_INACTIVE),
-		20,
+		MAKEINTRESOURCEW(m_memphisStyle == TRUE ? IDB_MEMPHIS_GO_INACTIVE : IDB_GO_INACTIVE),
+		m_memphisStyle == TRUE ? 18 : 20,
 		0,
 		RGB(255, 0, 255),
 		IMAGE_BITMAP,
@@ -103,8 +125,8 @@ LRESULT AddressBar::CreateGoButton()
 
 	m_himlGoActive = ImageList_LoadImageW(
 		resourceInstance,
-		MAKEINTRESOURCEW(IDB_GO_ACTIVE),
-		20,
+		MAKEINTRESOURCEW(m_memphisStyle == TRUE ? IDB_MEMPHIS_GO_ACTIVE : IDB_GO_ACTIVE),
+		m_memphisStyle == TRUE ? 18 : 20,
 		0,
 		RGB(255, 0, 255),
 		IMAGE_BITMAP,

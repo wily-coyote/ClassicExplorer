@@ -25,6 +25,7 @@ class ATL_NO_VTABLE ThrobberBand :
 		bool m_subclassedRebar = false;
 		bool m_alreadyDeletedSelf = false;
 		bool m_shouldManuallyCorrectHeight = false;
+		bool m_memphisStyle = false;
 
 		// Width of the current bitmap.
 		int m_cxCurBmp = 0;
@@ -79,6 +80,7 @@ class ATL_NO_VTABLE ThrobberBand :
 		LRESULT OnEraseBackground(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL &bHandled);
 
 	protected: // Miscellaneous functions:
+		LRESULT GetBooleanRegKey(PTCHAR key, bool* boolValue);
 		void ClearResources();
 
 		static LRESULT CALLBACK RebarParentSubclassProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData);
