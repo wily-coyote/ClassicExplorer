@@ -8,6 +8,31 @@
 
 namespace CEUtil
 {
+/*
+ * Get HKEY from HKCU/Software/ClassicExplorer.
+ */
+LRESULT GetHkey(HKEY* hkDest){
+	return RegCreateKeyEx(HKEY_CURRENT_USER, TEXT("SOFTWARE\\ClassicExplorer"), 0, NULL, 0, KEY_READ|KEY_WRITE, NULL, hkDest, NULL);
+}
+
+/*
+ * Get a DWORD value from an HKEY. Creates it with the dwDefault if it doesn't exist.
+ */
+LRESULT DwordFromHkey(HKEY hkSrc, DWORD* dwDest, LPCTSTR szValue, DWORD* dwDefault){
+	DWORD cbDest = sizeof(DWORD);
+	LRESULT lResult = RegGetValue(hkSrc, TEXT(""), szValue, RRF_RT_DWORD, NULL, dwDest, &cbDest);
+	if (lResult == ERROR_FILE_NOT_FOUND) {
+		CEUtil::HkeyFromDword(dwDefault, hkSrc, szValue);
+	}
+	return lResult;
+}
+
+/*
+ * Sets a DWORD from an HKEY.
+ */
+LRESULT HkeyFromDword(DWORD* dwSrc, HKEY hkDest, LPCTSTR szValue){
+	return RegSetValueEx(hkDest, szValue, 0, REG_DWORD, (BYTE*)dwSrc, sizeof(DWORD));
+}
 
 /*
  * FixExplorerSizes: Manually correct the sizes of all children in the explorer

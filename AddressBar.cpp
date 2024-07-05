@@ -9,26 +9,9 @@
 #include "dllmain.h"
 #include <commoncontrols.h>
 #include "shell_helpers.h"
-#include "winreg.h"
+#include "util.h"
 
 #include "AddressBar.h"
-
-LRESULT AddressBar::GetBooleanRegKey(PTCHAR key, bool* boolValue) {
-	HKEY regkey;
-	LSTATUS regstatus = RegCreateKeyEx(HKEY_CURRENT_USER, TEXT("SOFTWARE\\ClassicExplorer"), 0, NULL, REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS, NULL, &regkey, NULL);
-	if (regstatus == ERROR_SUCCESS) {
-		DWORD showGoButton_t;
-		BYTE bufShowGoButton[8192];
-		DWORD cbShowGoButton = sizeof(bufShowGoButton);
-		regstatus = RegQueryValueEx(regkey, key, NULL, &showGoButton_t, (LPBYTE)bufShowGoButton, &cbShowGoButton);
-		if (regstatus == ERROR_SUCCESS) {
-			DWORD* showGoButton = reinterpret_cast<DWORD*>(bufShowGoButton);
-			*boolValue = (*showGoButton != 0);
-			return S_OK;
-		}
-	}
-	return E_FAIL;
-}
 
 /*
  * OnCreate: Handle the WM_CREATE message sent out and create the address bar controls.
@@ -36,12 +19,21 @@ LRESULT AddressBar::GetBooleanRegKey(PTCHAR key, bool* boolValue) {
 LRESULT AddressBar::OnCreate(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL &bHandled)
 {
 	HINSTANCE moduleInstance = _AtlBaseModule.GetModuleInstance();
-	
-	m_showGoButton = TRUE;
-	m_memphisStyle = FALSE;
+	HKEY hKey = NULL;
 
-	GetBooleanRegKey(L"ShowGoButton", &m_showGoButton);
-	GetBooleanRegKey(L"MemphisStyle", &m_memphisStyle);
+	m_showGoButton = 1;
+	m_memphisStyle = 0;
+
+	if(CEUtil::GetHkey(&hKey) == ERROR_SUCCESS){
+		DWORD dwBool;
+		LRESULT lResult;
+		if(CEUtil::DwordFromHkey(hKey, &dwBool, TEXT("ShowGoButton"), &m_showGoButton) == ERROR_SUCCESS){
+			m_showGoButton = dwBool;                           
+		}                                                          
+		if(CEUtil::DwordFromHkey(hKey, &dwBool, TEXT("MemphisStyle"), &m_memphisStyle) == ERROR_SUCCESS){
+			m_memphisStyle = dwBool;
+		}
+	}
 
 	m_toolbar = CreateWindowEx(
 		WS_EX_TOOLWINDOW,

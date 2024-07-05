@@ -25,7 +25,7 @@ class ATL_NO_VTABLE ThrobberBand :
 		bool m_subclassedRebar = false;
 		bool m_alreadyDeletedSelf = false;
 		bool m_shouldManuallyCorrectHeight = false;
-		bool m_memphisStyle = false;
+		DWORD m_memphisStyle = 0;
 
 		// Width of the current bitmap.
 		int m_cxCurBmp = 0;

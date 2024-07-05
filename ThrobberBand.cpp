@@ -13,23 +13,6 @@
 
 #include "ThrobberBand.h"
 
-LRESULT ThrobberBand::GetBooleanRegKey(PTCHAR key, bool* boolValue) {
-	HKEY regkey;
-	LSTATUS regstatus = RegCreateKeyEx(HKEY_CURRENT_USER, TEXT("SOFTWARE\\ClassicExplorer"), 0, NULL, REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS, NULL, &regkey, NULL);
-	if (regstatus == ERROR_SUCCESS) {
-		DWORD showGoButton_t;
-		BYTE bufShowGoButton[8192];
-		DWORD cbShowGoButton = sizeof(bufShowGoButton);
-		regstatus = RegQueryValueEx(regkey, key, NULL, &showGoButton_t, (LPBYTE)bufShowGoButton, &cbShowGoButton);
-		if (regstatus == ERROR_SUCCESS) {
-			DWORD* showGoButton = reinterpret_cast<DWORD*>(bufShowGoButton);
-			*boolValue = (*showGoButton != 0);
-			return S_OK;
-		}
-	}
-	return E_FAIL;
-}
-
 void ThrobberBand::ClearResources()
 {
 	DeleteObject(m_hBitmap);
@@ -487,8 +470,16 @@ STDMETHODIMP ThrobberBand::SetSite(IUnknown *pUnkSite)
 		}
 	}
 
-	m_memphisStyle = FALSE;
-	GetBooleanRegKey(L"MemphisStyle", &m_memphisStyle);
+	HKEY hKey = NULL;
+
+	m_memphisStyle = 0;
+
+	if(CEUtil::GetHkey(&hKey) == ERROR_SUCCESS){
+		DWORD dwBool;
+		if(CEUtil::DwordFromHkey(hKey, &dwBool, TEXT("MemphisStyle"), &m_memphisStyle) == ERROR_SUCCESS){
+			m_memphisStyle = dwBool;
+		}
+	}
 
 	LoadBitmapForSize();
 

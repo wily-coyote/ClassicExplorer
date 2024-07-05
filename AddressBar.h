@@ -19,8 +19,8 @@ class AddressBar : public CWindowImpl<AddressBar>
 		HWND m_comboBox = NULL;
 		HWND m_comboBoxEditCtl = NULL;
 
-		bool m_showGoButton = false;
-		bool m_memphisStyle = false;
+		DWORD m_showGoButton = 1;
+		DWORD m_memphisStyle = 0;
 
 		HIMAGELIST m_himlGoInactive = NULL;
 		HIMAGELIST m_himlGoActive = NULL;
